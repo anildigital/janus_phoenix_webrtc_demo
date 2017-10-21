@@ -20,7 +20,7 @@ defmodule JanusPhoenixWebrtcDemo.Mixfile do
   def application do
     [
       mod: {JanusPhoenixWebrtcDemo.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [:logger, :runtime_tools, :con_cache]
     ]
   end
 
@@ -41,6 +41,7 @@ defmodule JanusPhoenixWebrtcDemo.Mixfile do
       {:phoenix_live_reload, "~> 1.0", only: :dev},
       {:gettext, "~> 0.11"},
       {:cowboy, "~> 1.0"},
+      {:con_cache, "~> 0.12.0"},
       {:janus, git: "git@github.com:ndarilek/elixir-janus.git"}
     ]
   end
