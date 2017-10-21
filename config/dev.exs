@@ -6,13 +6,22 @@ use Mix.Config
 # The watchers configuration can be used to run external
 # watchers to your application. For example, we use it
 # with brunch.io to recompile .js and .css sources.
-config :janus_phoenix_webrtc_demo, JanusPhoenixWebrtcDemoWeb.Endpoint,
+config(
+  :janus_phoenix_webrtc_demo,
+  JanusPhoenixWebrtcDemoWeb.Endpoint,
   http: [port: 4000],
   debug_errors: true,
   code_reloader: true,
   check_origin: false,
-  watchers: [node: ["node_modules/brunch/bin/brunch", "watch", "--stdin",
-                    cd: Path.expand("../assets", __DIR__)]]
+  watchers: [
+    node: [
+      "node_modules/brunch/bin/brunch",
+      "watch",
+      "--stdin",
+      cd: Path.expand("../assets", __DIR__)
+    ]
+  ]
+)
 
 # ## SSL Support
 #
@@ -31,28 +40,40 @@ config :janus_phoenix_webrtc_demo, JanusPhoenixWebrtcDemoWeb.Endpoint,
 # different ports.
 
 # Watch static and templates for browser reloading.
-config :janus_phoenix_webrtc_demo, JanusPhoenixWebrtcDemoWeb.Endpoint,
-  live_reload: [
-    patterns: [
-      ~r{priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$},
-      ~r{priv/gettext/.*(po)$},
-      ~r{lib/janus_phoenix_webrtc_demo_web/views/.*(ex)$},
-      ~r{lib/janus_phoenix_webrtc_demo_web/templates/.*(eex)$}
-    ]
+config(:janus_phoenix_webrtc_demo, JanusPhoenixWebrtcDemoWeb.Endpoint, live_reload: [
+  patterns: [
+    ~r{priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$},
+    ~r{priv/gettext/.*(po)$},
+    ~r{lib/janus_phoenix_webrtc_demo_web/views/.*(ex)$},
+    ~r{lib/janus_phoenix_webrtc_demo_web/templates/.*(eex)$}
   ]
+])
 
 # Do not include metadata nor timestamps in development logs
-config :logger, :console, format: "[$level] $message\n"
+config(:logger, :console, format: "[$level] $message\n")
 
 # Set a higher stacktrace during development. Avoid configuring such
 # in production as building large stacktraces may be expensive.
-config :phoenix, :stacktrace_depth, 20
+config(:phoenix, :stacktrace_depth, 20)
 
 # Configure your database
-config :janus_phoenix_webrtc_demo, JanusPhoenixWebrtcDemo.Repo,
+config(
+  :janus_phoenix_webrtc_demo,
+  JanusPhoenixWebrtcDemo.Repo,
   adapter: Ecto.Adapters.Postgres,
   username: "postgres",
   password: "postgres",
   database: "janus_phoenix_webrtc_demo_dev",
   hostname: "localhost",
   pool_size: 10
+)
+
+config(
+  :janus_phoenix_webrtc_demo,
+  janus_url: "http://localhost:8088/janus",
+  mjr2webm_path: "/Users/anil/bin/mjr2webm.sh",
+  recordings_path: "/tmp/janus_recordings",
+  app_s3_bucket_url: "https://myjanus_phoenix_webrtc_demo.s3.amazonaws.com/"
+)
+
+config(:janus_phoenix_webrtc_demo, janus: JanusPhoenixWebrtcDemo.Janus)

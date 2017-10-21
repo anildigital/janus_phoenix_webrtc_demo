@@ -3,7 +3,7 @@ defmodule JanusPhoenixWebrtcDemoWeb.UserSocket do
 
   ## Channels
   # channel "room:*", JanusPhoenixWebrtcDemoWeb.RoomChannel
-  channel("room:lobby", JanusPhoenixWebrtcDemoWeb.RoomChannel)
+  channel("room:*", JanusPhoenixWebrtcDemoWeb.RoomChannel)
 
   ## Transports
   transport(:websocket, Phoenix.Transports.WebSocket)

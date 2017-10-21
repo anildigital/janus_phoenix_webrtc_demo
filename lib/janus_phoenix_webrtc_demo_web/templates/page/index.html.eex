@@ -1,36 +1,51 @@
-<div class="jumbotron">
-  <h2><%= gettext "Welcome to %{name}!", name: "Phoenix" %></h2>
-  <p class="lead">A productive web framework that<br />does not compromise speed and maintainability.</p>
+<script id="remoteVideoTemplate" type="text/x-handlebars-template">
+  <div class="remoteVideo col-md-4" publisher_id="{{publisher_id}}">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">{{display}}<span class="label label-info" id="remote1"></span></h3>
+      </div>
+      <div class="panel-body relative" id="videoremote1">
+        <video class="rounded centered" id="remotevideo{{publisher_id}}" width="100%" height="100%" autoplay/>
+      </div>
+      <div style="margin-left:20px;margin-top:-5px;margin-bottom:10px;font-size:15px;word-spacing:10px;">
+        <button class="" style="cursor: pointer;" onclick="video.toggleFullScreen('remotevideo{{publisher_id}}');"></button>
+      </div>
+    </div>
+  </div>
+</script>
+
+
+<div>
+  <div id="videos">
+    <div>
+      <h4>Video room</h4>
+    </div>
+    <div class="row" id="allVideos">
+      <div class="col-md-4">
+        <div class="panel panel-default">
+
+          <div class="panel-heading">
+            <h3 class="panel-title">You <span class="label label-primary" id="publisher"></span></h3>
+          </div>
+          <div class="panel-body" id="videolocal">
+          </div>
+          <div id="publisherButtons" class="hide" style="cursor: pointer;margin-left:20px;margin-top:-5px;margin-bottom:10px;font-size:15px;word-spacing:10px;">
+            <span id="muteAudio" class="volume-up" style="color:blue">Voice</span>
+            <span id="muteVideo" class="deo" style="color:blue;">Video</span>
+            <span id="muteVideo" class="" onclick="video.toggleFullScreen('myvideo');"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row" style="cursor: pointer;margin-left:5px;margin-bottom:10px;font-size:25px;word-spacing:10px;">
+      <button id="shareVideo" title="Share Video" >Share video</button>
+      <button id="stopSharing" title="Stop Sharing">Stop sharing</button>
+    </div>
+  </div>
 </div>
 
-<div class="row marketing">
-  <div class="col-lg-6">
-    <h4>Resources</h4>
-    <ul>
-      <li>
-        <a href="http://phoenixframework.org/docs/overview">Guides</a>
-      </li>
-      <li>
-        <a href="https://hexdocs.pm/phoenix">Docs</a>
-      </li>
-      <li>
-        <a href="https://github.com/phoenixframework/phoenix">Source</a>
-      </li>
-    </ul>
+<%= if user = @conn.assigns[:current_visitor] do %>
+  <div id="app_data" class="display:hidden" user_id="<%= user.id %>" name="<%= user.firstname %>"
+       room_id="<%= @room_id %>" room_name="<%= @room_name %>" record="false">
   </div>
-
-  <div class="col-lg-6">
-    <h4>Help</h4>
-    <ul>
-      <li>
-        <a href="http://groups.google.com/group/phoenix-talk">Mailing list</a>
-      </li>
-      <li>
-        <a href="http://webchat.freenode.net/?channels=elixir-lang">#elixir-lang on freenode IRC</a>
-      </li>
-      <li>
-        <a href="https://twitter.com/elixirphoenix">@elixirphoenix</a>
-      </li>
-    </ul>
-  </div>
-</div>
+<% end %>

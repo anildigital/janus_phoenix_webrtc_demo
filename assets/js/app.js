@@ -15,7 +15,30 @@ import "phoenix_html"
 
 // Import local files
 //
-// Local files can be imported directly using relative
+// Local files can be imported directly usiAAng relative
 // paths "./socket" or full ones "web/static/js/socket".
 
-// import socket from "./socket"
+import WebRTC from "./webrtc"
+
+import socket from "./socket"
+
+function uuid() {
+    function s4() {
+        return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+    }
+    return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+}
+
+// Now that you are connected, you can join channels with a topic:
+var channel_name = "room:user:" + uuid();
+
+let channel = socket.channel(channel_name, {})
+channel.join()
+                    .receive("ok", resp => { console.log("Joined successfully", resp) })
+                    .receive("error", resp => { console.log("Unable to join", resp) })
+
+
+
+window.webrtc = WebRTC(channel);
+
+webrtc.init()
