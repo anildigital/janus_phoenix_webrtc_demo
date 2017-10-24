@@ -19,6 +19,7 @@ import "phoenix_html"
 // paths "./socket" or full ones "web/static/js/socket".
 
 import WebRTC from "./webrtc"
+import Events from "./events"
 
 import socket from "./socket"
 
@@ -30,15 +31,24 @@ function uuid() {
 }
 
 // Now that you are connected, you can join channels with a topic:
-var channel_name = "room:user:" + uuid();
+var channelName = "room:user:" + uuid();
 
-let channel = socket.channel(channel_name, {})
+let channel = socket.channel(channelName, {})
 channel.join()
                     .receive("ok", resp => { console.log("Joined successfully", resp) })
                     .receive("error", resp => { console.log("Unable to join", resp) })
 
 
+var videoroomChannelName = "room:videoroom";
+
+let videoroomChannel = socket.channel(videoroomChannelName, {})
+videoroomChannel.join()
+             .receive("ok", resp => { console.log("Joined successfully", resp) })
+             .receive("error", resp => { console.log("Unable to join", resp) })
+
 
 window.webrtc = WebRTC(channel);
+window.events = Events(videoroomChannel);
 
 webrtc.init()
+events.init()

@@ -76,9 +76,15 @@ defmodule JanusPhoenixWebrtcDemoWeb.RoomChannel do
 
   # @decorate channel_action()
   def handle_in("stop", %{}, socket) do
-    handle_in("stop", %{"stop_recording" => false, "user_id" => nil, "name" => nil}, socket)
     {:noreply, socket}
   end
+
+  # # @decorate channel_action()
+  # def handle_in("events", %{"event" => event} = payload, socket) do
+  #   IO.puts("Got event #{inspect(event)}")
+  #   broadcast(socket, "events", payload)
+  #   {:noreply, socket}
+  # end
 
   # Add authorization logic here as required.
   defp authorized?(_payload) do

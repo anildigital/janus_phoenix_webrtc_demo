@@ -38,6 +38,8 @@ defmodule RoomCall do
   end
 
   def handle_event(event, parent) do
+    IO.inspect("AND THE EVENT IS": event)
+
     case event do
       {:event, pid, plugin_pid, data, nil} ->
         IO.puts("Data received #{inspect(pid)}")
@@ -125,13 +127,14 @@ defmodule RoomCall do
             IO.puts("Got leaving event")
             IO.inspect(leaving)
 
-          # JanusPhoenixWebrtcDemoWeb.Endpoint.broadcats(room_name, "events", %{
-          # JanusPhoenixWebrtcDemoWeb.Endpoint.broadcast(room_name, "events", %{
-          #   janus: :event,
-          #   type: :leaving,
-          #   remote_handle_id: remote_handle_id,
-          #   leaving: leaving
-          # })
+            room_name = "room:videoroom"
+
+            JanusPhoenixWebrtcDemoWeb.Endpoint.broadcast(room_name, "events", %{
+              janus: :event,
+              type: :leaving,
+              remote_handle_id: remote_handle_id,
+              leaving: leaving
+            })
 
           %{unpublished: []} ->
             IO.puts("Got leaving empty")
@@ -144,12 +147,12 @@ defmodule RoomCall do
             IO.puts("Got unpublished event")
             IO.inspect(unpublished)
 
-            # JanusPhoenixWebrtcDemoWeb.Endpoint.broadcast(room_name, "events", %{
-            #   janus: :event,
-            #   type: :leaving,
-            #   remote_handle_id: remote_handle_id,
-            #   unpublished: unpublished
-            # })
+            JanusPhoenixWebrtcDemoWeb.Endpoint.broadcast(room_name, "events", %{
+              janus: :event,
+              type: :leaving,
+              remote_handle_id: remote_handle_id,
+              unpublished: unpublished
+            })
         end
 
       {:event, pid, plugin_pid, data, jsep} ->
