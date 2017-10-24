@@ -101,12 +101,8 @@ defmodule JanusPhoenixWebrtcDemoWeb.RoomChannel do
 
   defp setup_janus(jsep) do
     # Create session
-    janus_url = Application.get_env(:janus_phoenix_webrtc_demo, :janus_url)
-    {:ok, session} = Janus.Session.start(janus_url)
-
-    {:ok, handle} =
-      session
-      |> Janus.Session.attach_plugin("janus.plugin.videoroom")
+    {:ok, session_server} = Supervisor.start_child(Janus.Supervisor, [])
+    {session, handle} = Janus.Session.GenServer.start_session(session_server)
 
     # Add handler for session
     Janus.Session.add_handler(session, SessionCall, %{:jsep => jsep})

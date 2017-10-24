@@ -13,7 +13,8 @@ defmodule JanusPhoenixWebrtcDemo.Application do
       # Start the endpoint when the application starts
       supervisor(JanusPhoenixWebrtcDemoWeb.Endpoint, []),
       supervisor(ConCache, [[], [name: :app_cache]], id: :app_cache),
-      supervisor(ConCache, [[], [name: :handle_cache]], id: :handle_cache)
+      supervisor(ConCache, [[], [name: :handle_cache]], id: :handle_cache),
+      supervisor(Janus.Supervisor, [[]])
       # Start your own worker by calling: JanusPhoenixWebrtcDemo.Worker.start_link(arg1, arg2, arg3)
       # worker(JanusPhoenixWebrtcDemo.Worker, [arg1, arg2, arg3]),
     ]
