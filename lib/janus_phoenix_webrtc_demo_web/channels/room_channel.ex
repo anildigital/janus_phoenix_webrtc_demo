@@ -1,6 +1,14 @@
 defmodule JanusPhoenixWebrtcDemoWeb.RoomChannel do
   use JanusPhoenixWebrtcDemoWeb, :channel
 
+  def join("room:videoroom", payload, socket) do
+    if authorized?(payload) do
+      {:ok, socket}
+    else
+      {:error, %{reason: "unauthorized"}}
+    end
+  end
+
   def join("room:user:" <> user_id, payload, socket) do
     if authorized?(payload) do
       socket = assign(socket, :user_id, user_id)
