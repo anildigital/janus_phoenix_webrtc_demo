@@ -104,6 +104,8 @@ defmodule JanusPhoenixWebrtcDemoWeb.RoomChannel do
     {:ok, session_server} = Supervisor.start_child(Janus.Supervisor, [])
     {session, handle} = Janus.Session.GenServer.start_session(session_server)
 
+    ConCache.put(:pid_cache, session, session_server)
+    ConCache.put(:pid_cache, handle, session_server)
     # Add handler for session
     Janus.Session.add_handler(session, SessionCall, %{:jsep => jsep})
 

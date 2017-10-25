@@ -143,16 +143,8 @@ defmodule RoomCall do
             IO.puts("Got leaving nil")
 
           %{unpublished: unpublished} ->
-            remote_handle_id = ConCache.get(:handle_cache, plugin_pid)
             IO.puts("Got unpublished event")
             IO.inspect(unpublished)
-
-            JanusPhoenixWebrtcDemoWeb.Endpoint.broadcast(room_name, "events", %{
-              janus: :event,
-              type: :leaving,
-              remote_handle_id: remote_handle_id,
-              unpublished: unpublished
-            })
         end
 
       {:event, pid, plugin_pid, data, jsep} ->
@@ -198,8 +190,10 @@ defmodule RoomCall do
       {:media, pid, plugin_pid, type, receiving} ->
         IO.puts("media receiving #{receiving} #{inspect(pid)}")
 
-        if receiving == false do
-          Janus.Plugin.detach(plugin_pid)
+        if receiving == false and type == "video" do
+          Janus.Session.destroy(pid)
+          session_server = ConCache.get(:pid_cache, pid)
+          Process.exit(session_server, :kill)
         end
 
       {:slowlink, pid, plugin_pid, uplink, nacks} ->
