@@ -1,5 +1,5 @@
 defmodule Janus.Session.GenServer do
-  use GenServer
+  use GenServer, restart: :temporary
 
   @doc """
   Starts the registry.
