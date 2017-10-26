@@ -39,6 +39,15 @@ defmodule JanusPhoenixWebrtcDemoWeb.RoomChannel do
     {:noreply, socket}
   end
 
+  # @decorate channel_action()
+  def handle_in("offer_publish", %{"jsep" => %{"body" => jsep}}, socket) do
+    handle = socket.assigns[:publisher_handle]
+
+    RoomCall.start(handle, jsep)
+
+    {:noreply, socket}
+  end
+
   # broadcast to everyone in the current topic (standup_room:lobby).
   # @decorate channel_action()
   def handle_in(
@@ -84,6 +93,17 @@ defmodule JanusPhoenixWebrtcDemoWeb.RoomChannel do
 
   # @decorate channel_action()
   def handle_in("stop", %{}, socket) do
+    {:noreply, socket}
+  end
+
+  def handle_in("unpublish", %{}, socket) do
+    handle = socket.assigns[:publisher_handle]
+
+    if handle do
+      RoomCall.unpublish(handle)
+      RoomCall.hangup(handle)
+    end
+
     {:noreply, socket}
   end
 

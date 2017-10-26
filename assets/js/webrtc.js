@@ -40,6 +40,36 @@ var WebRTC = (function (channel) {
         })
     }
 
+    var unpublish = function() {
+        if (localStream) {
+            var tracks = localStream.getTracks();
+            for(var i in tracks) {
+                var mst = tracks[i];
+                if(mst !== null && mst !== undefined)
+                    mst.stop();
+            }
+        }
+        channel.push("unpublish")
+    }
+
+
+    var reSharevideo = function () {
+        var constraints = {
+            video: true,
+            audio: true,
+        };
+
+        if (navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices
+                     .getUserMedia(constraints)
+                     .then(getUserMediaSuccessReshare)
+                     .catch(errorHandler);
+        } else {
+            alert('Your browser does not support getUserMedia API');
+        }
+    }
+
+
     var shareVideo = function () {
         var constraints = {
             video: true,
@@ -84,6 +114,19 @@ var WebRTC = (function (channel) {
         webrtc.startPublishing();
     }
 
+    function getUserMediaSuccessReshare(stream) {
+        localStream = stream;
+
+        localStream.getVideoTracks()[0].onended = function () {
+            webrtc.stopPublishing();
+        };
+
+        stream.getVideoTracks();
+        $('#myvideo').get(0).srcObject = stream;
+        republish();
+    }
+
+
     var stopPublishing = function () {
         var userId = $("#app_data").attr("user_id");
         var userId = $("#app_data").attr("name");
@@ -99,6 +142,49 @@ var WebRTC = (function (channel) {
 
         $("body").removeClass("livestrip")
         $(".localstream").removeClass("borderBlink")
+    }
+
+
+    var republish = function () {
+        $("body").addClass("livestrip")
+        $(".localstream").addClass("borderBlink")
+        $("#shareVideo").hide();
+        $("#stopSharing").show();
+
+        peerConnection = new RTCPeerConnection(peerConnectionConfig, pcConstraints);
+        peerConnection.onicecandidate = gotIceCandidate;
+
+        peerConnection.addEventListener('iceconnectionstatechange', function (e) {
+            console.log('ice state change', peerConnection.iceConnectionState);
+        });
+
+        peerConnection
+            .addStream(localStream);
+
+        $("#startPublishing").addClass("hide");
+        $("#stopPublishing").removeClass("hide");
+        $("#publisherButtons").removeClass("hide");
+
+        var publisherConstraints = {
+            'mandatory': {
+                'OfferToReceiveAudio': false,
+                'OfferToReceiveVideo': false
+            }
+        }
+
+        start = new Date();
+        peerConnection
+            .createOffer(createdDescriptionRepublish, errorHandler, publisherConstraints);
+
+        $("#publisherButtons").removeClass("hide");
+
+        $("#muteAudio").click(function () {
+            video.toggleAudio(localStream);
+        });
+
+        $("#muteVideo").click(function () {
+            video.toggleVideo(localStream);
+        });
     }
 
     var startPublishing = function () {
@@ -246,6 +332,23 @@ var WebRTC = (function (channel) {
         }, errorHandler);
     }
 
+
+    function createdDescriptionRepublish(description) {
+        peerConnection.setLocalDescription(description, function () {
+            var data = {
+                jsep: {
+                    body: {
+                        type: description.type,
+                        sdp: description.sdp
+                    }
+                }
+            }
+
+            console.log("Sending republish offer");
+            channel.push("offer_publish", data)
+        }, errorHandler);
+    }
+
     function createdDescriptionAnswer(description, peerConnectionForAnswer, handle) {
         console.log("Setting local description");
         peerConnectionForAnswer.setLocalDescription(description, function () {
@@ -294,7 +397,9 @@ var WebRTC = (function (channel) {
     return {
         init: init,
         startPublishing: startPublishing,
-        stopPublishing: stopPublishing
+        stopPublishing: stopPublishing,
+        unpublish: unpublish,
+        reSharevideo: reSharevideo
     }
 })
 

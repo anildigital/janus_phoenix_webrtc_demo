@@ -25,6 +25,18 @@ defmodule RoomCall do
     {:ok, room_id}
   end
 
+  def start_publish(plugin_pid, jsep) do
+    Janus.Plugin.message(plugin_pid, %{audio: true, request: "configure", video: true}, jsep)
+  end
+
+  def unpublish(plugin_pid) do
+    Janus.Plugin.message(plugin_pid, %{request: "unpublish"}, nil)
+  end
+
+  def hangup(plugin_pid) do
+    Janus.Plugin.message(plugin_pid, %{request: "hangup"}, nil)
+  end
+
   def answer(plugin_pid, jsep) do
     session_id = get_session_id(plugin_pid)
     room_id = ConCache.get(:app_cache, %{session_id: session_id, type: "room_id"})
@@ -145,6 +157,17 @@ defmodule RoomCall do
           %{unpublished: unpublished} ->
             IO.puts("Got unpublished event")
             IO.inspect(unpublished)
+
+            remote_handle_id = ConCache.get(:handle_cache, plugin_pid)
+
+            room_name = "room:videoroom"
+
+            JanusPhoenixWebrtcDemoWeb.Endpoint.broadcast(room_name, "events", %{
+              janus: :event,
+              type: :leaving,
+              remote_handle_id: remote_handle_id,
+              leaving: unpublished
+            })
         end
 
       {:event, pid, plugin_pid, data, jsep} ->
