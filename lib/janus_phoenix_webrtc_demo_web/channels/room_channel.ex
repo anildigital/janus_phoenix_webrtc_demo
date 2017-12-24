@@ -43,7 +43,7 @@ defmodule JanusPhoenixWebrtcDemoWeb.RoomChannel do
   def handle_in("offer_publish", %{"jsep" => %{"body" => jsep}}, socket) do
     handle = socket.assigns[:publisher_handle]
 
-    RoomCall.start(handle, jsep)
+    RoomCall.start_publish(handle, jsep)
 
     {:noreply, socket}
   end

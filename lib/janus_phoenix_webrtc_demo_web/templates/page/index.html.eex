@@ -39,6 +39,7 @@
     </div>
     <div class="row" style="cursor: pointer;margin-left:5px;margin-bottom:10px;font-size:25px;word-spacing:10px;">
       <button id="shareVideo" title="Share Video" >Share video</button>
+      <button id="shareScreen" title="Share Screen" >Share screen</button>
       <button id="stopSharing" title="Stop Sharing">Stop sharing</button>
     </div>
   </div>

@@ -6,7 +6,7 @@ defmodule RoomCall do
     user_id = random_string(10)
 
     # FIXME
-    room_id = 3_800_664_449_808_512
+    room_id = 1234
 
     session_id = get_session_id(plugin_pid)
     ConCache.put(:app_cache, %{session_id: session_id, type: "room_id"}, room_id)

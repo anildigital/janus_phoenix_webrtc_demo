@@ -29,6 +29,7 @@ var WebRTC = (function (channel) {
         channel.on("data", gotMessageFromServer)
 
         $("#shareVideo").click(shareVideo);
+        $("#shareScreen").click(shareScreenTrigger);
 
         $("#stopSharing").hide();
 
@@ -117,9 +118,9 @@ var WebRTC = (function (channel) {
     function getUserMediaSuccessReshare(stream) {
         localStream = stream;
 
-        localStream.getVideoTracks()[0].onended = function () {
-            webrtc.stopPublishing();
-        };
+        // localStream.getVideoTracks()[0].onended = function () {
+        //     webrtc.stopPublishing();
+        // };
 
         stream.getVideoTracks();
         $('#myvideo').get(0).srcObject = stream;
@@ -151,8 +152,12 @@ var WebRTC = (function (channel) {
         $("#shareVideo").hide();
         $("#stopSharing").show();
 
-        peerConnection = new RTCPeerConnection(peerConnectionConfig, pcConstraints);
-        peerConnection.onicecandidate = gotIceCandidate;
+        // peerConnection = new RTCPeerConnection(peerConnectionConfig, pcConstraints);
+        // peerConnection.onicecandidate = gotIceCandidate;
+
+        peerConnection.onicecandidate = function() {
+            consolel.log("noActionTaken on republish for onicecandidate")
+        }
 
         peerConnection.addEventListener('iceconnectionstatechange', function (e) {
             console.log('ice state change', peerConnection.iceConnectionState);
@@ -388,6 +393,75 @@ var WebRTC = (function (channel) {
         });
     }
 
+    function startShareWebrtcScreen() {
+        shareScreenTrigger();
+    }
+
+    var shareScreenTrigger = function () {
+        var f = function (event) {
+            if ((event.data.sourceId != undefined) && (event.data.sourceId != null) && (event.data.sourceId != "")) {
+                // stopPublishing(shareScreen.bind(null, event.data.sourceId));
+                shareScreen(event.data.sourceId);
+            } else {
+                return false;
+            }
+            // TODO fix this remove event listener properly.
+            window.removeEventListener("message", f, false);
+        };
+        window.addEventListener('message', f);
+        window.postMessage({ type: 'janusGetScreen' }, '*');
+    }
+
+    var shareScreen = function (sourceId) {
+        var constraints = {
+            video: {
+                mandatory: {
+                    chromeMediaSource: "desktop",
+                    maxWidth: 1280,
+                    maxHeight: 800,
+                    minFrameRate: 3,
+                    maxFrameRate: 3,
+                    chromeMediaSourceId: sourceId
+                },
+                optional: [
+                    {
+                        googLeakyBucket: true
+                    },
+                    {
+                        googTemporalLayeredScreencast: true
+                    }
+                ]
+            }
+        }
+        if (navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices
+                .getUserMedia(constraints)
+                .then(getUserMediaAudio)
+                .catch(errorHandler);
+        } else {
+            alert('Your browser does not support getUserMedia API');
+        }
+    }
+
+    function getUserMediaAudio(screenStream) {
+        var constraints = {
+            audio: true
+        };
+
+        if (navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices
+                .getUserMedia(constraints)
+                .then(function(audioStream){
+                    var audioTrack = audioStream.getAudioTracks()[0];
+                    screenStream.addTrack( audioTrack );
+                    getUserMediaSuccessReshare(screenStream);
+                })
+                .catch(errorHandler);
+        } else {
+            alert('Your browser does not support getUserMedia API');
+        }
+    }
+
     function errorHandler(error) {
         console.log(error);
         console.log(error.lineNumber);
@@ -399,7 +473,8 @@ var WebRTC = (function (channel) {
         startPublishing: startPublishing,
         stopPublishing: stopPublishing,
         unpublish: unpublish,
-        reSharevideo: reSharevideo
+        reSharevideo: reSharevideo,
+        stopPublishing: stopPublishing
     }
 })
 
