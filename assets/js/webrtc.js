@@ -1,6 +1,7 @@
 var peerConnection;
 var peerConnectionForAnswer;
 var localStream;
+var previousStream;
 
 var start;
 var stop;
@@ -88,21 +89,14 @@ var WebRTC = (function (channel) {
     }
 
     function getUserMediaSuccess(stream) {
+        if (previousStream) {
+            previousStream = localStream
+            getUserMediaSuccessReshare(stream);
+            return;
+        }
+
         localStream = stream;
-
-        localStream.getVideoTracks()[0].onended = function () {
-            webrtc.stopPublishing();
-        };
-
-        $('#videolocal').append('<video class="localstream" muted="muted" class="rounded centered" id="myvideo" height="100%" width="100%" autoplay/>');
-
-        stream.getVideoTracks();
-        $('#myvideo').get(0).srcObject = stream;
-        webrtc.startPublishing();
-    }
-
-    function getUserMediaSuccess(stream) {
-        localStream = stream;
+        previousStream = stream;
 
         localStream.getVideoTracks()[0].onended = function () {
             webrtc.stopPublishing();
@@ -122,8 +116,21 @@ var WebRTC = (function (channel) {
         //     webrtc.stopPublishing();
         // };
 
-        stream.getVideoTracks();
+        // stream.getVideoTracks();
+        // $('#myvideo').get(0).srcObject = stream;
+
+        // previousStream.removeTrack(previousStream.getVideoTracks()[0]);
+
+        // peerConnection.addTrack(stream.getVideoTracks()[0], stream);
+
+        peerConnection
+            .removeStream(previousStream);
+
+        peerConnection
+            .addStream(stream);
+
         $('#myvideo').get(0).srcObject = stream;
+
         republish();
     }
 
@@ -149,7 +156,7 @@ var WebRTC = (function (channel) {
     var republish = function () {
         $("body").addClass("livestrip")
         $(".localstream").addClass("borderBlink")
-        $("#shareVideo").hide();
+//        $("#shareVideo").hide();
         $("#stopSharing").show();
 
         // peerConnection = new RTCPeerConnection(peerConnectionConfig, pcConstraints);
@@ -163,8 +170,12 @@ var WebRTC = (function (channel) {
             console.log('ice state change', peerConnection.iceConnectionState);
         });
 
-        peerConnection
-            .addStream(localStream);
+        // previousStream.removeTrack(previousStream.getVideoTracks()[0]);
+
+        // peerConnection.addTrack(localStream.getVideoTracks()[0], localStream);
+
+        // peerConnection
+        //     .addStream(localStream);
 
         $("#startPublishing").addClass("hide");
         $("#stopPublishing").removeClass("hide");
@@ -195,7 +206,7 @@ var WebRTC = (function (channel) {
     var startPublishing = function () {
         $("body").addClass("livestrip")
         $(".localstream").addClass("borderBlink")
-        $("#shareVideo").hide();
+        // $("#shareVideo").hide();
         $("#stopSharing").show();
 
         peerConnection = new RTCPeerConnection(peerConnectionConfig, pcConstraints);
@@ -240,6 +251,8 @@ var WebRTC = (function (channel) {
         var jsep = message.jsep;
         var sdp = jsep;
 
+        console.log("SDP received is", sdp.type)
+
         if (sdp.type === 'offer') {
             console.log("remote handle is ", message.remote_handle_id)
             console.log("publisher id is ", message.publisher_id)
@@ -254,6 +267,12 @@ var WebRTC = (function (channel) {
     }
 
     function createAnswer(offerSdp, remote_handle_id, publisher_id, display) {
+
+        if (remote_handle_id === undefined) {
+            console.log("Not doing anything in createAnswer and returning immediately")
+            return;
+        }
+
         var receiverConstraints = {
             'mandatory': {
                 'OfferToReceiveAudio': true,
